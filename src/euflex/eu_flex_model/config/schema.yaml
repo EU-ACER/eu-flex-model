@@ -1,0 +1,864 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+description: >
+  JSON schema for the EU-Flex model configuration. Validates config.default.yaml including run settings,
+  scenario definitions, solving parameters, network settings, and constraints.
+  The eu-flex-platform distribution merges schema.platform.yaml over this
+  document to describe the settings it adds.
+
+type: object
+additionalProperties: false
+
+# Conditional validation: Apply min/max constraints to cy only when market_interconnection is "fbmc"
+if:
+  properties:
+    eva:
+      properties:
+        market_interconnection:
+          const: "fbmc"
+then:
+  properties:
+    scenario:
+      properties:
+        cy:
+          type: array
+          items:
+            type: integer
+            minimum: 1982
+            maximum: 2019
+            description: "Each --cy must be an integer. When using presets, options are 2010 and 2013. When building from the database, any values between 1982 and 2017 are accepted."
+
+properties:
+  version:
+    type: string
+    description: "Configuration version identifier"
+
+  run:
+    type: object
+    additionalProperties: false
+    properties:
+      name:
+        type: string
+        pattern: '^[a-zA-Z0-9_-]*$'
+        description: "Name of the run. Also selects the pre-built set, unless parent is set. Only alphanumeric characters, underscore, and hyphen are allowed."
+      parent:
+        type: string
+        pattern: '^[a-zA-Z0-9_-]*$'
+        description: "Name of the run whose pre-built set to read, when it differs from name. Only alphanumeric characters, underscore, and hyphen are allowed."
+      keep_files:
+        type: boolean
+        description: "Keep the large intermediate networks instead of emptying them once they have been consumed."
+      scenarios:
+        type: object
+        additionalProperties: false
+        description: "Parameter sweeps: a YAML file of per-run configuration overrides, applied by run name. Read by set_scenario_config at the start of each rule script."
+        properties:
+          enable: {type: boolean}
+          file: {type: string}
+          prefix: {type: string}
+    required: [name]
+
+  logging:
+    type: object
+    additionalProperties: true
+    properties:
+      level:
+        type: string
+        enum: [CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET]
+
+  scenario:
+    type: object
+    additionalProperties: false
+    properties:
+      ll:
+        type: array
+        items: {type: string}
+      clusters:
+        type: array
+        items: {type: string}
+      ty:
+        type: array
+        items: {type: integer}
+        description: "Target year. List several to assess more than one."
+      cy:
+        type: array
+        items:
+          type: integer
+          items: {type: integer}
+          description: "Each --cy must be an integer. When using presets, options are 2010 and 2013. When building from the database, any values between 1982 and 2017 are accepted."
+      ft:
+        type: array
+        items:
+          type: string
+          enum: ["actual", "forecast"]
+          description: "Must be a string of either 'actual' or 'forecast'."
+      opts:
+        type: array
+        items: {type: string}
+
+  eva:
+    type: object
+    additionalProperties: false
+    properties:
+      enable:
+        type: boolean
+        description: "Option to enable EVA based capacity update of extendable assets or keep them fixed"
+      perfect_foresight:
+        type: object
+        additionalProperties: false
+        properties:
+          enable:
+            type: boolean
+            description: "Enable perfect foresight mode. When true, uses a single market timeframe with actual data (no separate DA/ID markets)."
+        required: [enable]
+      fmc_only:
+        type: object
+        additionalProperties: false
+        properties:
+          enable:
+            type: boolean
+            description: "Enable Fixed Market Clearing (FMC) mode. When true, uses final iteration networks from a parent EVA run instead of building new base networks."
+          parent_run:
+            type: string
+            description: "Job ID of the parent EVA run whose final iteration networks will be used as base networks for FMC."
+          parent_run_path:
+            type: string
+            description: "Absolute path to the parent EVA run directory. Used internally by run-fmc command."
+        required: [enable]
+      restart_from:
+        type: object
+        additionalProperties: false
+        properties:
+          enable:
+            type: boolean
+            description: "Enable restart/warm-start mode. When true, iteration 0 base networks are taken from the latest complete iteration of a parent run instead of from pre-builts or the database."
+          parent_run:
+            type: string
+            description: "Job ID of the parent run whose latest complete iteration networks seed iteration 0."
+          parent_run_path:
+            type: string
+            description: "Absolute path to the parent run directory. Set internally by --restart-from-job-id."
+        required: [enable]
+      build_network:
+        type: object
+        properties:
+          workflow_prebuilt:
+            type: object
+            properties:
+              path:
+                type: string
+                description: "Pre-built base network to start from, with {run}, {ty} and {cy} placeholders."
+            required: [path]
+          sensitivity_path:
+            type: string
+            description: "Folder of network CSVs that sensitivity mode (eva.sensitivity) builds the base network from, with {run}, {ty} and {cy} placeholders; {run} is run.parent. A relative path is taken from the working directory if it exists there, and from the input directory (EUFLEX_INPUT_DIR, or the checkout) otherwise. Empty: the folder the prepare_sensitivity export of run.parent writes to, <EUFLEX_SENSITIVITY_DIR>/base_{run}/ty_{ty}_cy_{cy}."
+          scale_network:
+            type: object
+            additionalProperties: false
+            properties:
+              enable:
+                type: boolean
+                description: "Whether to upscale capacities in the base network to avoid infeasibility in the first iteration due to restrictive reserve requirements. Default: false"
+              capacity_scaling_factor:
+                type: number
+                minimum: 0
+                description: "Scaling factor to apply when upscaling capacities. Default: 1"
+              min_capacity:
+                type: number
+                minimum: 0
+                description: "Minimum capacity threshold for generators when upscaling. Default: 0.001"
+              load_scaling_factor:
+                type: number
+                minimum: 0
+                description: "Scaling factor to apply when upscaling loads. Default: 1"
+              da_res_ts_multiplier:
+                type: number
+                minimum: 0
+                description: "Multiplier applied to renewable generator p_max_pu timeseries for forecast (DA) networks at it=0. Default: 1.0"
+              da_load_ts_multiplier:
+                type: number
+                minimum: 0
+                description: "Multiplier applied to load p_set timeseries for forecast (DA) networks at it=0. Default: 1.0"
+              id_res_ts_multiplier:
+                type: number
+                minimum: 0
+                description: "Multiplier applied to renewable generator p_max_pu timeseries for actual (ID) networks at it=0. Default: 1.0"
+              id_load_ts_multiplier:
+                type: number
+                minimum: 0
+                description: "Multiplier applied to load p_set timeseries for actual (ID) networks at it=0. Default: 1.0"
+          forecast_timeseries_source:
+            type: string
+            enum: ["noise", "csv"]
+            description: "Source for forecast timeseries: 'noise' for synthetic noise generation, 'csv' for user-supplied forecast CSVs (see forecast_p_max_pu_path/forecast_p_set_path)"
+          forecast_p_max_pu_path:
+            type: string
+            description: "Path to a user-supplied forecast generators p_max_pu CSV, in the same format as 'generators-p_max_pu.csv' exported by prepare-sensitivity (one row per network snapshot in order, columns=generator names; the index column's value is ignored, rows are matched by position). Used when forecast_timeseries_source is 'csv'. A relative path is taken from the working directory if it exists there, and from the input directory (EUFLEX_INPUT_DIR, or the checkout) otherwise."
+          forecast_p_set_path:
+            type: string
+            description: "Path to a user-supplied forecast loads p_set CSV, in the same format as 'loads-p_set.csv' exported by prepare-sensitivity (one row per network snapshot in order, columns=load names; the index column's value is ignored, rows are matched by position). Used when forecast_timeseries_source is 'csv'. A relative path is taken from the working directory if it exists there, and from the input directory (EUFLEX_INPUT_DIR, or the checkout) otherwise."
+      base_network:
+        type: object
+        properties:
+          consider_p_nom_max: {type: boolean}
+          pu_must_run: {type: boolean}
+          forecast_noise_std: {type: number, minimum: 0}
+          consider_cyclic_soc: {type: boolean}
+          remove_ramp_su_sd: {type: boolean}
+          efficiency:
+            type: object
+            additionalProperties: {type: number, minimum: 0, maximum: 1}
+            description: "Default charge/discharge (storage) or conversion (generator) efficiency by carrier, applied only when the source data has no value for that carrier. For pumped hydro, this is the per-direction efficiency; round-trip efficiency is this value squared."
+          committable_carriers:
+            type: array
+            items: {type: string}
+            description: "List of conventional carriers that should be set as committable"
+          id_free_commitment_carriers:
+            type: array
+            items: {type: string}
+            description: "Carriers whose committable generators are free to (re)commit in the intra-day stage; excluded from align_ramp_limits commitment locking"
+          decommissioned_carriers:
+            type: object
+            additionalProperties: false
+            properties:
+              Generator:
+                type: array
+                items: {type: string}
+              StorageUnit:
+                type: array
+                items: {type: string}
+              Store:
+                type: array
+                items: {type: string}
+              Link:
+                type: array
+                items: {type: string}
+            description: "List of carriers that are candidate to decommissioning only (separated by Generator, StorageUnit, Store, and Link)"
+          negative_pricing:
+            type: object
+            additionalProperties: false
+            properties:
+              enable:
+                type: boolean
+                description: "Enable negative pricing with _NEG generators for renewables. Default: false"
+              share:
+                type: number
+                minimum: 0
+                maximum: 1
+                description: "Default share of capacity for _NEG generators (0-1). Default: 0.30"
+              value:
+                type: number
+                maximum: 0
+                description: "Default negative price in EUR/MWh. Must be <= 0. Default: -50.0"
+              carriers:
+                type: object
+                additionalProperties: false
+                properties:
+                  Solar (PV):
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      share:
+                        type: number
+                        minimum: 0
+                        maximum: 1
+                      value:
+                        type: number
+                        maximum: 0
+                  Wind Onshore:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      share:
+                        type: number
+                        minimum: 0
+                        maximum: 1
+                      value:
+                        type: number
+                        maximum: 0
+                  Wind Offshore:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      share:
+                        type: number
+                        minimum: 0
+                        maximum: 1
+                      value:
+                        type: number
+                        maximum: 0
+                  Hydro - Run of River (Turbine):
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      share:
+                        type: number
+                        minimum: 0
+                        maximum: 1
+                      value:
+                        type: number
+                        maximum: 0
+            required: [enable]
+      reserves:
+        type: object
+        properties:
+          option:
+            type: string
+            enum: ["none", "co-optimised", "derated"]
+            description: >
+              Reserve mode for the day-ahead market.
+              'none': no reserve constraints (disables reserve co-optimisation).
+              'co-optimised': energy and reserves co-optimised (default).
+              'derated': p_max_pu/p_min_pu adjusted by reserve amounts before solving; fixed
+              r_FRR/FCR timeseries added to output; no reserve co-optimisation equations.
+          direction:
+            type: array
+            items:
+              type: string
+              enum: ["up", "down"]
+            description: >
+              Reserve directions to include. Applies to both co-optimised (which variables and
+              constraints are created) and derated (which bounds are adjusted and which timeseries
+              are written) modes. Use ["up"] for upward only, ["down"] for downward only, or
+              ["up", "down"] for both (default).
+          file:
+            type: string
+            description: "Path to reserves requirements file. Default: 'data/ERAA_2024_reserve_requirements.xlsx'"
+          fcr:
+            type: object
+            additionalProperties: false
+            properties:
+              id_blocked:
+                type: number
+                minimum: 0
+                maximum: 1
+                description: "Fraction of FCR capacity blocked in intraday market (0-1). Controls how much of day-ahead FCR is unavailable for intraday dispatch."
+              penalty_cost:
+                type: number
+                minimum: 0
+                description: "Penalty cost for the FCR in the objective function. Avoids over reservation."
+              reserve_blocking_method:
+                type: string
+                enum: ["fraction"]
+                description: "Method for blocking FCR reserves in intraday market. Only 'fraction' is supported for FCR. Default: 'fraction'"
+          frr:
+            type: object
+            additionalProperties: false
+            properties:
+              id_blocked:
+                type: number
+                minimum: 0
+                maximum: 1
+                description: "Fraction of FRR capacity blocked in intraday market (0-1). Controls how much of day-ahead FRR is unavailable for intraday dispatch."
+              penalty_cost:
+                type: number
+                minimum: 0
+                description: "Penalty cost for the FRR in the objective function. Avoids over reservation."
+              reserve_blocking_method:
+                type: string
+                enum: ["fraction", "imbalance"]
+                description: "Method for blocking FRR reserves in intraday market. 'fraction' uses static id_blocked parameter. 'imbalance' uses dynamic blocking based on forecast errors between DA and ID. Default: 'fraction'"
+      sensitivity: {type: boolean}
+      soc_validation_zones:
+        type: array
+        items: {type: string}
+      export_lp_models: {type: boolean}
+      export_gurobi_logs: {type: boolean}
+      export_gurobi_mps: {type: boolean}
+      max_it:
+        type: integer
+        description: "--max-it must be single value and a positive integer at least equal to 1"
+      maintenance_plan_frequency:
+        type: integer
+      capacity_update:
+        type: object
+        properties:
+          increment:
+            type: integer
+            description: "--increment must be single value and a positive integer"
+          threshold:
+            type: integer
+            description: "--threshold must be a single value and a positive integer"
+          linear_decay:
+            type: boolean
+            description: "must be true or false"
+          linear_decay_iterations:
+            type: [integer, "null"]
+            description: "Number of iterations over which to spread the linear decay. Defaults to max_it when null."
+          linear_decay_min_step:
+            type: [number, "null"]
+            description: "Target minimum step size in MW."
+      npv:
+        type: object
+        properties:
+          weighted_calculation:
+            type: object
+            properties:
+              enabled:
+                type: boolean
+                description: "Enable weighted NPV calculation across climate years. If false, all CYs are weighted equally."
+              cy_weights:
+                type: object
+                description: "Per-CY weight mapping (e.g. 2013: 0.35, 2010: 0.30). Values must sum to 1.0 when enabled is true."
+                additionalProperties:
+                  type: number
+                  minimum: 0
+      advanced_clustering:
+        type: object
+        properties:
+          enable:
+            type: boolean
+            description: "Enable frequent horizon re-clustering for EVA iterations."
+          n_clusters:
+            type: integer
+            minimum: 1
+            description: "Number of K-medoids clusters (k). Must be >= 1."
+          full_run_frequency:
+            type: integer
+            minimum: 1
+            description: "Run all weeks every N EVA iterations to refresh clusters."
+          random_seed:
+            type: integer
+            description: "Random seed for K-medoids reproducibility."
+          horizon_days:
+            type: integer
+            minimum: 1
+            description: "Chunk length in days for clustering (e.g. 7 = one week, 14 = two weeks). Chunks slide from the first snapshot without calendar alignment."
+      enable_mothballing:
+        type: boolean
+        description: "Enable mothballing for existing units. When true, units can be temporarily offline and reactivated later. Costs (Mothballing_FOM, Demothballing_Cost) are applied from database."
+      enable_lifetime_extension:
+        type: boolean
+        description: "Enable lifetime extension evaluation for existing units beyond original lifetime. Costs (Lifetime_Extension_FOM) are applied from database."
+      validation_plot_frequency:
+        type: integer
+      infeasibility_threshold:
+        type: number
+        minimum: 0
+        maximum: 1
+        description: "Maximum allowed fraction of infeasible horizons within one market optimization (0-1). Workflow fails if exceeded. Default: 0.05"
+      fail_on_infeasibility:
+        type: boolean
+        description: "Whether to fail the workflow if infeasibility threshold is exceeded. Default: true"
+      patching_tol_status:
+        type: number
+        description: "Tolerance (p.u.) for zeroing near-zero and rounding near-one LP status residuals in fix_small_status_variables. Values with abs(status) <= tol are set to 0; values with abs(status-1) <= tol are set to 1. Default: 1e-6."
+      patching_tol_ramp:
+        type: number
+        description: "Maximum allowed ramp adjustment (p.u. of p_nom) in the ID feasibility correction. Adjustments within this tolerance are applied silently; larger adjustments trigger a warning and are skipped. Default: 1e-6."
+      market_interconnection:
+        type: string
+        enum: ["fbmc", "ntc", "physical"]
+        description: "Market interconnection method. Options are 'fbmc', 'ntc' or 'physical'."
+      integration_tests:
+        type: object
+        additionalProperties: false
+        properties:
+          enable:
+            type: boolean
+            description: "Enable integration tests during workflow execution to validate market behavior and consistency."
+          soc_tolerance:
+            type: number
+            description: "Relative tolerance for SOC limit checks (default: 0.1 = 10%). Violations are detected when actual > limit * (1 + tolerance)."
+          dispatch_tolerance:
+            type: number
+            description: "Absolute tolerance for dispatch limit checks in per-unit (default: 1e-6)."
+          price_flow_tolerance:
+            type: number
+            description: "Relative tolerance for price-flow consistency checks (default: 0.001 = 0.1%). Violations are detected when price0 > price1 * (1 + tolerance) for flow from bus0 to bus1."
+          fail_on_error:
+            type: boolean
+            description: "Whether to fail the workflow if integration tests detect violations (default: false)."
+      eraa_year:
+        type: integer
+        enum: [2023, 2024]
+        description: "ERAA year data used in the simulation."
+      dsr:
+        type: object
+        additionalProperties: false
+        properties:
+          enabled:
+            type: boolean
+            description: "Enable DSR (Demand Side Response) components in the model"
+          explicit_dsr:
+            type: object
+            additionalProperties: false
+            properties:
+              enabled:
+                type: boolean
+                description: "Enable explicit DSR generators"
+              da_dispatch_fixed_fraction:
+                type: number
+                minimum: 0
+                maximum: 1
+                description: "Fraction of day-ahead DSR dispatch that must be maintained in intraday market (0-1). Reflects DSR with lead time requirements or DA-only responsiveness."
+          implicit_dsr:
+            type: object
+            additionalProperties: false
+            properties:
+              enabled:
+                type: boolean
+                description: "Enable implicit DSR storage units"
+              da_dispatch_fixed_fraction:
+                type: number
+                minimum: 0
+                maximum: 1
+                description: "Fraction of day-ahead implicit DSR dispatch that must be maintained in intraday market (0-1). Reflects DSR with lead time requirements or DA-only responsiveness."
+      must_run:
+        type: object
+        additionalProperties: false
+        properties:
+          enable_slack:
+            type: boolean
+            description: "Absorb must-run capacity the dispatch cannot serve with a priced slack variable instead of a hard constraint. Disabling reverts to a hard p >= must_run_requirement constraint, which can make the model infeasible when commitment, ramp limits, or reserve blocking leave no feasible way to meet the requirement. Default: true."
+          slack_penalty:
+            type: number
+            minimum: 0
+            description: "Penalty (EUR/MWh) charged on must-run capacity that the dispatch cannot serve, via the Generator-must_run_slack variable. Keep it above any generator marginal cost so must-run is respected whenever feasible, and below the load shedding penalty. Only relevant when enable_slack is true. Default: 1000.0."
+      price_cap:
+        type: object
+        additionalProperties: false
+        properties:
+          enable:
+            type: boolean
+            description: "Enable price cap update mechanism following HMMCP methodology"
+          day_ahead_values:
+            type: array
+            items:
+              type: number
+              minimum: 0
+            description: "Starting price caps for day-ahead markets, one per target year (ty). Must have length >= len(ty)"
+          intraday_values:
+            type: array
+            items:
+              type: number
+              minimum: 0
+            description: "Starting price caps for intraday markets, one per target year (ty). Must have length >= len(ty)"
+          increment:
+            type: number
+            minimum: 0
+            description: "Amount to increment price cap when price cap increase events occur (EUR/MWh)"
+          maximum:
+            type: number
+            minimum: 0
+            description: "Maximum allowed price cap value (EUR/MWh)"
+          multi_year_method:
+            type: string
+            enum: ["interpolation", "last-year", "none", "expected"]
+            description: "Method for handling price caps across multiple target years (ty). Options are 'interpolation', 'last-year', 'none', or 'expected'. The 'expected' method uses the expected (mean) final price cap across all climate years from the previous target year."
+        required: [enable]
+      dummy_storage_optimization:
+        type: object
+        additionalProperties: false
+        properties:
+          enable:
+            type: boolean
+            description: "Whether to enable dummy storage optimization. Default: false."
+          energy_power_ratios:
+            type: array
+            items:
+              type: number
+            description: "List of energy-to-power ratios (in hours) for the dummy storage optimization."
+          shared_across_countries:
+            type: boolean
+            description: "Whether dummy storage capacity is shared across countries."
+          minimize_system_costs:
+            type: boolean
+            description: "Whether to minimize system costs in dummy storage optimization."
+          curtailment_targets:
+            type: array
+            items:
+              type: number
+              minimum: 0
+              maximum: 1
+            description: "List of curtailment target ratios (0-1) for dummy storage optimization."
+          export_models:
+            type: boolean
+            description: "Whether to export the mathematical model (.lp) for dummy storage optimization."
+          network_needs:
+            type: boolean
+            description: "Whether to consider TSO/DSO network needs in dummy storage optimization. The network needs are random mock data (up to 80% of the RES availability per hour and bidding zone), since no TSO/DSO data is available yet. Default: false."
+          enable_load_spillage:
+            type: boolean
+            description: "Whether to enable load spillage generators in dummy storage optimization for handling infeasibilities. Default: true."
+          load_spillage_penalty:
+            type: number
+            minimum: 0
+            description: "Penalty (EUR/MWh) applied to load spillage when minimize_system_costs is false, so the capacity-minimization objective still discourages spillage instead of installing dummy storage. Default: 10000.0."
+          conventional_floor_carriers:
+            type: [array, "null"]
+            items:
+              type: string
+            description: "Conventional carriers whose technical minimum (p_min_pu times commitment status) enters the lower bound of the clustered conventional generator per bus in dummy storage optimization. The must-run requirement of all conventional generators always enters it. null selects all conventional carriers, an empty list keeps only the must-run requirement, carriers that are not conventional carriers of the input network raise an error. Default: null."
+          solver_options:
+            type: object
+            additionalProperties:
+              type: string
+            description: "Mapping of solver name to the key in solving.solver_options used for dummy storage optimization, independent of solving.solver.options. The thread count of the configured solver options is kept. Solvers not in the mapping use the configured solver options. Default: {highs: highs-lp-baseline, gurobi: gurobi-optimal-dummy-storage}."
+          curtailment_targets_per_bz:
+            type: boolean
+            description: "Whether to use per-bidding-zone curtailment targets from data/ds_curtailment_targets_by_bz.csv instead of config values. Default: false."
+        required: [energy_power_ratios]
+      storage_planning:
+        type: object
+        properties:
+          enable:
+            type: boolean
+            description: "Enable/disable storage planning based on simplified solving"
+          static_soc_target:
+            type: number
+            description: "If storage planning is disabled, set a static SOC target"
+          storage_plan_frequency:
+            type: integer
+          storage_constraints_enabled:
+            type: boolean
+            description: "Whether to add or not storage technical and historical constraints to the market models. Default: true"
+          po_resolution:
+            type: string
+            pattern: "^([1-9]|[1-9][0-9]|1[0-6][0-8])h$"
+            description: "Each resolution must be an  integer number followed by 'h', e.g., '1h', '24h' AND it must not be greater than 2 days for micro-test and nordic-test or 1 week for quick, temporal, and regional-test to align with snapshots of the network"
+          preopt_targeted_carriers:
+            type: array
+            items:
+              type: string
+            description: "Storage unit carriers treated as hydro storage for pre-optimization SOC/dispatch planning in plan_storage.py"
+          use_cyclic_soc:
+            type: boolean
+            description: "Whether cyclic state of charge (SOC start == SOC end) is enforced for the targeted carriers during storage pre-optimization. When enabled, the market models (day-ahead, intraday, intraday without ramping and perfect foresight) also initialize state_of_charge_initial for those units from the storage plan value at t=0. Default: true"
+        additionalProperties: false
+      ramping_shortfall:
+        type: object
+        properties:
+          enable:
+            type: boolean
+            description: "Enable/disable ramping shortfall indicator calculation"
+        additionalProperties: false
+      ramping_contribution:
+        type: object
+        properties:
+          n_worst_events:
+            type: array
+            items:
+              type: integer
+              minimum: 1
+            description: "List specifying the top N worst events to evaluate for ramping contributions. E.g., [1, 10, 25]"
+        additionalProperties: false
+      forced_outages:
+        type: object
+        properties:
+          enable:
+            type: boolean
+            description: "Whether to enable forced outage scenarios in the EVA workflow. When enabled, applies stochastic generator outages to actual markets. Default: true"
+          samples:
+            type: integer
+            minimum: 1
+            description: "Number of forced outage Monte Carlo samples to generate (e.g., 1, 5, 10). Each sample uses a different random seed. Default: 1"
+          seed:
+            type: [string, array]
+            description: "Random seeds for forced outage scenarios. Can be a comma-separated string (e.g., '3,5,50') or list of integers. Length must match 'samples'. If not specified, outages will be non-reproducible."
+          n_units_per_fleet:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+            description: "Number of individual units to model per generator fleet for outage sampling. Each unit's outages are sampled independently and aggregated to get fleet availability (0.0-1.0). Higher values produce smoother availability curves. Default: 100"
+        additionalProperties: false
+      shadow_prices:
+        type: object
+        additionalProperties: false
+        properties:
+          enable:
+            type: boolean
+            description: "Enable extraction of shadow prices (dual variables) from optimization results. Output written to separate shadow_prices_{ty}_{cy}.nc file. Default: false"
+          constraints:
+            type: array
+            items:
+              type: string
+            description: "List of constraint names to extract shadow prices for. Format: 'Component-constraint_name' matching PyPSA's internal naming (e.g., 'Bus-nodal_balance', 'Bus-Reserve_requirements_FCR_up')"
+      short_term_requirements:
+        type: object
+        additionalProperties: false
+        description: "Configuration for short-term requirements (forecast error) indicator calculation."
+        properties:
+          method:
+            type: string
+            enum: ["simulation", "probabilistic"]
+            description: "Method to calculate short-term requirements. 'simulation' uses DA vs ID residual load difference. 'probabilistic' uses forecast error distributions and flex capacity. Default: 'simulation'"
+          condition_1_months:
+            type: array
+            items:
+              type: integer
+              minimum: 1
+              maximum: 12
+            description: "Months for system condition 1 (e.g. winter). Used by probabilistic method."
+          condition_2_months:
+            type: array
+            items:
+              type: integer
+              minimum: 1
+              maximum: 12
+            description: "Months for system condition 2 (e.g. summer). Used by probabilistic method."
+          condition_3_months:
+            type: array
+            items:
+              type: integer
+              minimum: 1
+              maximum: 12
+            description: "Optional months for system condition 3. Used by probabilistic method."
+          condition_a_hours:
+            type: array
+            items:
+              type: integer
+              minimum: 0
+              maximum: 23
+            description: "Hours for system condition a (e.g. day). Used by probabilistic method."
+          condition_b_hours:
+            type: array
+            items:
+              type: integer
+              minimum: 0
+              maximum: 23
+            description: "Hours for system condition b (e.g. night). Used by probabilistic method."
+          condition_c_hours:
+            type: array
+            items:
+              type: integer
+              minimum: 0
+              maximum: 23
+            description: "Optional hours for system condition c. Used by probabilistic method."
+          percentile_low:
+            type: number
+            minimum: 0.0
+            maximum: 50.0
+            description: "Lower tail percentile for forecast error distribution (0-50). Used by probabilistic method. Default: 0.1"
+          percentile_high:
+            type: number
+            minimum: 50.0
+            maximum: 100.0
+            description: "Upper tail percentile for forecast error distribution (50-100). Used by probabilistic method. Default: 99.9"
+        required: [method]
+
+  solving:
+    type: object
+    properties:
+      options:
+        type: object
+        properties:
+          load_shedding: {type: boolean}
+          reserve_shedding: {type: boolean}
+          load_spill: {type: boolean}
+          horizon: {type: number}
+          overlap: {type: number}
+          linearized_unit_commitment: {type: boolean}
+          use_convex_hull_tightening: {type: boolean}
+          linearized_uc_threshold: {type: number}
+      solver:
+        type: object
+        properties:
+          name:
+            type: string
+            enum: ["highs", "gurobi", "xpress", "cbc", "cplex", "knitro"]
+          options: {type: string}
+      solver_options:
+        type: object
+        additionalProperties:
+          type: object
+          properties:
+            run_crossover:
+              type: string
+              enum: ["on", "off", "choose"]
+            threads:
+              type: integer
+      check_objective:
+        type: object
+        properties:
+          enable: {type: boolean}
+          expected_value: {type: number}
+      maintenance_planning:
+        type: object
+        additionalProperties: false
+        properties:
+          enable: {type: boolean}
+          min_duration_hours: {type: number}
+          annual_windows: {type: number}
+          penalty_weight: {type: number}
+          sa_initial_acceptance: {type: number, exclusiveMinimum: 0, exclusiveMaximum: 1}
+          sa_alpha: {type: number}
+          sa_max_iterations: {type: integer}
+          sa_units_per_move: {type: integer}
+          sa_parallel_runs: {type: integer}
+          sa_random_seed: {type: integer}
+          source: {type: string, enum: [optimize, plan-id]}
+          csv_path: {type: string}
+
+  costs:
+    type: object
+    properties:
+      discount_rate:
+        type: number
+        exclusiveMinimum: 0
+        description: "Discount rate used as fallback in NPV calculation when technology-specific hurdle rates are unavailable. Also used globally when use_hurdle_rates is false. Default: 0.05 (i.e., 5%)"
+      use_hurdle_rates:
+        type: boolean
+        description: "Use technology-specific hurdle rates (WACC + Hurdle_Premium) for NPV calculation. If false, uses global discount_rate for all technologies. Default: true"
+      exogenous_revenues:
+        type: object
+        description: "Configuration for exogenous revenue streams (e.g., heat, balancing, capacity market) applied during NPV calculation."
+        properties:
+          enable:
+            type: boolean
+            description: "Enable exogenous revenue streams. Default: false"
+          file:
+            type: string
+            description: "Path to the exogenous revenues Excel file containing columns: target_year, market_node, resource_type, value (€/kW/year)."
+      co2_targets:
+        type: object
+        description: "Configuration for CO2 emission target comparison (electricity sector) against EU member state policy targets."
+        properties:
+          enable:
+            type: boolean
+            description: "Enable CO2 target comparison. Default: false"
+          file:
+            type: string
+            description: "Path to the CSV fallback file containing CO2 targets with columns: year, country_short, kpi, value, unit."
+      necp_targets:
+        type: object
+        description: "Configuration for NECP RES generation targets comparison."
+        properties:
+          enable:
+            type: boolean
+            description: "Enable NECP RES generation target comparison. Default: false"
+          file:
+            type: string
+            description: "Path to the NECP targets CSV file (relative to data/ directory). Used as fallback when database is unavailable."
+
+  compression:
+    type: object
+    additionalProperties: false
+    properties:
+      zlib:
+        type: boolean
+      complevel:
+        type: integer
+        minimum: 0
+        maximum: 9
+
+  plotting:
+    type: object
+    properties:
+      enable:
+        type: boolean
+        description: "Enable or disable plot_model_outputs rule. Default: false"
+      map:
+        type: object
+        properties:
+          boundaries: {}
+      eu_node_location:
+        type: object
+        properties:
+          x: {type: number}
+          y: {type: number}
+      costs_max: {type: number}
+      costs_threshold: {type: number}
+      energy_max: {}
+      energy_min: {}
+      energy_threshold: {type: number}

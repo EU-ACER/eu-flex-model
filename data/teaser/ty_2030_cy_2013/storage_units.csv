@@ -1,0 +1,6 @@
+name,bus,p_nom,p_nom_extendable,p_nom_min,p_min_pu,p_max_pu,carrier,capital_cost,build_year,lifetime,state_of_charge_initial,max_hours,Lifetime_Extension_FOM,hurdle_rate,decommissioning_year,efficiency_store,efficiency_dispatch,reserve_FCR,reserve_FRR,p_nom_max,unit_id,lifetime_extendable,lifetime_extension_capex,lifetime_extension_years,hurdle_rate_lifetime_extension,FCR_up_amount,FCR_down_amount,FRR_up_amount,FRR_down_amount,CHP_revenue,CM_revenue,balancing_revenue,congestion_revenue
+N3_Hydro,N3,20000,FALSE,0,0,1,Hydro - Reservoir,0,2030,20,5000000,500,,,2050,0,1,TRUE,TRUE,,,,,,,,,,,,,,
+N1 BESS,N1,100,TRUE,0,-1,1,Batteries,80000,2030,15,100,2,,0.08,2070,1,0.9,TRUE,TRUE,,,,,,,,,,,,,,
+N1_iDSR,N1,750,FALSE,0,-1,1,DSR_implicit,0,2030,40,27000,72,,,2070,1,1,TRUE,TRUE,,,,,,,,,,,,,,
+N2_iDSR,N2,750,FALSE,0,-1,1,DSR_implicit,0,2030,40,27000,72,,,2070,1,1,TRUE,TRUE,,,,,,,,,,,,,,
+N3_iDSR,N3,750,FALSE,0,-1,1,DSR_implicit,0,2030,40,27000,72,,,2070,1,1,TRUE,TRUE,,,,,,,,,,,,,,

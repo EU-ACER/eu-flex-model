@@ -1,0 +1,61 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for the EU-Flex model
+title: "[Feature Request] "
+labels: ["enhancement"]
+body:
+- type: markdown
+  attributes:
+    value: |
+      ## Feature request
+      Thank you for your suggestion! We welcome ideas for improving the EU-Flex model. Please describe your proposed feature or enhancement.
+
+      > **⚠️ Feedback deadline: December 17, 2026**
+      > This deadline mirrors ACER's public consultation period (November 5 - December 17, 2026).
+      > Issues submitted after this date will not be considered for this release cycle.
+
+      > **📋 How feedback will be handled:**
+      >
+      > Please note that **only severe bug or error reports preventing users to install and run the model will be addressed as soon as feasible**. All other feedback will be collected and reviewed by ACER. A summary of the feedback collected and how ACER has addressed it will be provided in the EU-wide FNA report, planned to be published in **July 2027**.
+
+- type: textarea
+  id: problem
+  attributes:
+    label: Problem or use case
+    description: Is your feature request related to a problem or specific use case? Please describe.
+    placeholder: Describe the problem or use case that motivates this feature request
+  validations:
+    required: true
+
+- type: textarea
+  id: solution
+  attributes:
+    label: Proposed solution
+    description: Describe the feature or enhancement you would like to see
+    placeholder: A clear description of what you want to happen
+  validations:
+    required: true
+
+- type: dropdown
+  id: category
+  attributes:
+    label: Feature category
+    description: What area of the model does this feature relate to?
+    options:
+    - "Model Functionality"
+    - "Data Input / Output"
+    - "Performance / Optimization"
+    - "Configuration Options"
+    - "Other"
+  validations:
+    required: true
+
+- type: textarea
+  id: additional
+  attributes:
+    label: Additional context
+    description: Add any other context, examples, or screenshots about the feature request
+    placeholder: |-
+      - Examples from other tools or models
+      - Specific scenarios where this would be useful
+      - Any technical considerations
+      - Links to relevant research or documentation

@@ -1,0 +1,37 @@
+# Contributors to EU-Wide Flexibility Needs Assessment Model of the Future European Energy System
+#
+# The model accompanying the ACER paper "Preparing for the European flexibility
+# needs assessment" (2026): a stylised three-node system for target year 2030
+# and climate year 2013, over a full year of hourly snapshots. It computes the
+# flexibility indicators on the network as supplied, with a single EVA
+# iteration. config/teaser-eva.yaml iterates the capacities first.
+
+run:
+  name: teaser
+  keep_files: true  # keep the intermediate networks
+
+scenario:
+  ty: [2030]
+  cy: [2013]
+
+eva:
+  sensitivity: true
+  max_it: 1
+  build_network:
+    sensitivity_path: data/teaser/ty_{ty}_cy_{cy}
+    forecast_timeseries_source: csv
+    forecast_p_max_pu_path: data/teaser/ty_2030_cy_2013/generators-p_max_pu-forecast.csv
+    forecast_p_set_path: data/teaser/ty_2030_cy_2013/loads-p_set-forecast.csv
+  short_term_requirements:
+    method: simulation
+  dummy_storage_optimization:
+    enable: false
+  storage_planning:
+    po_resolution: 4h
+  ramping_shortfall:
+    enable: false
+
+solving:
+  solver_options:
+    highs-default:
+      ipm_optimality_tolerance: 1e-6

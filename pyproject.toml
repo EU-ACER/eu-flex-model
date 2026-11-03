@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eu-flex-model"
+version = "1.0.0"
+description = "EU-Flex Model: EU-wide flexibility needs assessment workflow"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+
+[tool.setuptools]
+packages = [
+    "euflex",
+    "euflex.eu_flex_model",
+    "euflex.eu_flex_model.scripts",
+    "euflex.eu_flex_model.scripts.helpers",
+    "euflex.eu_flex_model.rules",
+    "euflex.eu_flex_model.config",
+]
+include-package-data = true
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.package-data]
+"euflex.eu_flex_model" = [
+    "Snakefile",
+    "rules/*.smk",
+    "scripts/*.py",
+    "scripts/helpers/*.py",
+    "config/*.yaml",
+]

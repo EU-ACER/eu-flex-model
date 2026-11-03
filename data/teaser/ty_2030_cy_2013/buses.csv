@@ -1,0 +1,4 @@
+name,v_nom,x,y,reserve_FCR_id_blocked,reserve_FCR,reserve_FCR_full_activation_time,reserve_FRR_reserve_blocking_method,country,reserve_FCR_min_duration,reserve_FRR_full_activation_time,reserve_FRR_min_duration,reserve_FRR,reserve_FRR_id_blocked,co2_price,core_region,nordic_region
+N1,380,4.4699,50.5039,1,100,0.008333333,imbalance,BE,0.25,0.008333333,0.25,500,0,,FALSE,FALSE
+N2,380,2.2137,46.2276,1,100,0.008333333,imbalance,FR,0.25,0.008333333,0.25,500,0,,FALSE,FALSE
+N3,380,5.2913,52.1326,1,100,0.008333333,imbalance,NL,0.25,0.008333333,0.25,500,0,,FALSE,FALSE

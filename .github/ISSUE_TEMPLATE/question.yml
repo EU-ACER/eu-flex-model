@@ -1,0 +1,59 @@
+name: Question
+description: Ask a question about the EU-Flex model
+title: "[Question] "
+labels: ["question"]
+body:
+- type: markdown
+  attributes:
+    value: |
+      ## Ask a question
+      Thank you for your interest in the EU-Flex model. Please use this template to ask questions about the model installation, configuration and implementation or how to use the model.
+
+      > **⚠️ Feedback deadline: December 17, 2026**
+      > This deadline mirrors ACER's public consultation period (November 5 - December 17, 2026).
+      > Issues submitted after this date will not be considered for this release cycle.
+
+      > **📋 How feedback will be handled:**
+      >
+      > Please note that **only severe bug or error reports preventing users to install and run the model will be addressed as soon as feasible**. All other feedback will be collected and reviewed by ACER. A summary of the feedback collected and how ACER has addressed it will be provided in the EU-wide FNA report, planned to be published in **July 2027**.
+
+- type: dropdown
+  id: category
+  attributes:
+    label: Question category
+    description: What is your question about?
+    options:
+    - "Installation"
+    - "Model configuration"
+    - "Model execution"
+    - "Results interpretation"
+    - "Other"
+  validations:
+    required: true
+
+- type: textarea
+  id: question
+  attributes:
+    label: Your question
+    description: Please describe your question in detail
+    placeholder: What would you like to know about the EU-Flex model?
+  validations:
+    required: true
+
+- type: textarea
+  id: context
+  attributes:
+    label: Additional context
+    description: Provide any additional context that might help us answer your question
+    placeholder: |
+      - What you were trying to do
+      - What you expected to happen
+      - Any relevant configuration or commands you used
+      - Links to relevant sections of the README or User Manual (if applicable)
+
+- type: input
+  id: version
+  attributes:
+    label: Model version
+    description: Which version of the EU-Flex model are you using?
+    placeholder: "e.g., v1.0"

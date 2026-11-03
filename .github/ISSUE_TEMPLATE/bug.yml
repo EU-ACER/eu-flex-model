@@ -1,0 +1,95 @@
+name: Bug Report
+description: Report a bug or issue with the EU-Flex model
+title: "[Bug] "
+labels: ["bug"]
+body:
+- type: markdown
+  attributes:
+    value: |
+      ## Report a bug
+      Thank you for helping us improve the EU-Flex model. Please provide as much detail as possible to help us understand and fix the issue.
+
+      > **🔒 SECURITY NOTICE**
+      >
+      > **Any security-related issue should be flagged as High priority and reported directly to security@acer.europa.eu instead of creating a public GitHub issue.**
+      >
+      > Please do not publicly disclose security vulnerabilities through this issue tracker.
+
+      > **⚠️ Feedback deadline: December 17, 2026**
+      > This deadline mirrors ACER's public consultation period (November 5 - December 17, 2026).
+      > Issues submitted after this date will not be considered for this release cycle.
+
+      > **📋 How feedback will be handled:**
+      >
+      > Please note that **only severe or error reports preventing users to install and run the model will be addressed as soon as feasible**. All other feedback will be collected and reviewed by ACER. A summary of the feedback collected and how ACER has addressed it will be provided in the EU-wide FNA report, planned to be published in **July 2027**.
+
+- type: textarea
+  id: description
+  attributes:
+    label: Bug description
+    description: A clear and concise description of what the bug is
+    placeholder: Describe what went wrong
+  validations:
+    required: true
+
+- type: dropdown
+  id: priority
+  attributes:
+    label: Priority level
+    description: |
+      Select the priority level:
+      - **High**: Issues that affect critical functionalities or have significant impact
+      - **Medium**: Issues that have moderate impact on operations or user experience
+      - **Low**: Minor issues that do not significantly affect operations
+    options:
+    - "High"
+    - "Medium"
+    - "Low"
+  validations:
+    required: true
+
+- type: textarea
+  id: steps
+  attributes:
+    label: Steps to reproduce
+    description: How can we reproduce this issue?
+    placeholder: |
+      1. Install the model with...
+      2. Configure with settings...
+      3. Run command...
+      4. Observe error...
+  validations:
+    required: true
+
+- type: textarea
+  id: error
+  attributes:
+    label: Error messages / logs
+    description: If applicable, paste any error messages or relevant log output
+    render: shell
+    placeholder: Paste error messages or logs here
+
+- type: textarea
+  id: environment
+  attributes:
+    label: System information
+    description: Information about your local system setup
+    placeholder: |
+      - Operating system
+      - Python version
+      - Model version/release
+      - Installation method
+      - Any other relevant dependencies or configurations
+  validations:
+    required: true
+
+- type: textarea
+  id: additional
+  attributes:
+    label: Additional information
+    description: Any other context, screenshots, or information that might help
+    placeholder: |-
+      - Screenshots
+      - Configuration files
+      - Data samples (if applicable and not sensitive)
+      - Workarounds you have tried

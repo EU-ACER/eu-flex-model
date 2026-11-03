@@ -1,0 +1,53 @@
+# Contributors to EU-Wide Flexibility Needs Assessment Model of the Future European Energy System
+#
+# EU-Flex model workflow.
+#
+# Runs the EVA flexibility assessment end to end from pre-built networks:
+#
+#     snakemake --cores all
+#
+# Configuration is layered: the defaults bundled with this workflow, then
+# config/config.yaml from the working directory if it exists, then anything
+# passed with --configfile or --config.
+#
+# The eu-flex-platform distribution wraps this workflow rather than copying it
+# — its Snakefile includes rules/setup.smk and rules/model.smk from here and
+# adds its database and benchmarking rules on top. Keep this file free of
+# anything platform-specific.
+import os
+from pathlib import Path
+
+from snakemake.utils import min_version, validate
+
+min_version("8.11")
+
+from euflex import eu_flex_model
+
+# Taken from the installed package rather than workflow.basedir, so the
+# defaults are found whether this file is run directly, included from a
+# wrapping workflow, or executed out of site-packages.
+CONFIG_DIR = Path(eu_flex_model.__path__[0]) / "config"
+
+
+configfile: str(CONFIG_DIR / "config.default.yaml")
+
+
+# Working-directory overrides, if the user has any
+USER_CONFIG_DIR = Path(os.getenv("EUFLEX_CONFIG_DIR", "config"))
+
+if (USER_CONFIG_DIR / "config.yaml").exists():
+
+    configfile: str(USER_CONFIG_DIR / "config.yaml")
+
+
+validate(config, str(CONFIG_DIR / "schema.yaml"))
+
+
+include: "rules/setup.smk"
+include: "rules/model.smk"
+
+
+rule all:
+    default_target: True
+    input:
+        rules.plot_model_outputs.output,

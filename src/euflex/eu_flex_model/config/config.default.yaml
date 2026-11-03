@@ -1,0 +1,507 @@
+version: v2025.05.1
+
+compression:
+  zlib: true
+  complevel: 4
+
+logging:
+  level: INFO
+  format: '%(levelname)s:%(name)s:%(message)s'
+
+run:
+  name: ""
+  parent: ""
+  keep_files: false
+
+scenario:
+  ty:
+  - 2026
+  - 2030
+  cy:
+  - 2010
+  - 2013
+  ft:
+  - 'actual'
+  - 'forecast'
+
+eva:
+  enable: true
+  perfect_foresight:
+    enable: false
+  fmc_only:
+    enable: false
+    parent_run: none
+    parent_run_path: none
+  restart_from:
+    enable: false
+    parent_run: none
+    parent_run_path: none
+  build_network:
+    workflow_prebuilt:
+      path: data/pre-builts/base_{run}/input_scenarios/{ty}_{cy}.nc
+    sensitivity_path: "" # Folder of network CSVs read in sensitivity mode, with {run}, {ty} and {cy} placeholders; empty: the prepare_sensitivity export of run.parent
+    scale_network:
+      enable: true
+      capacity_scaling_factor: 1
+      min_capacity: .001
+      load_scaling_factor: 1
+      da_res_ts_multiplier: 1.0
+      da_load_ts_multiplier: 1.0
+      id_res_ts_multiplier: 1.0
+      id_load_ts_multiplier: 1.0
+    forecast_timeseries_source: "noise" # or "csv"
+    forecast_p_max_pu_path: "" # Path to a user-supplied forecast generators p_max_pu CSV (used when forecast_timeseries_source is "csv")
+    forecast_p_set_path: "" # Path to a user-supplied forecast loads p_set CSV (used when forecast_timeseries_source is "csv")
+  base_network:
+    forecast_noise_std: 1.0
+    consider_p_nom_max: true
+    pu_must_run: false
+    consider_cyclic_soc: false
+    remove_ramp_su_sd: false  # Remove ramp_limit_start_up/shut_down for committable generators (prevents LP cascade infeasibilities)
+    efficiency:  # Default charge/discharge (storage) or conversion (generator) efficiency by carrier, applied only when the source data has no value for that carrier. For pumped hydro, this is the per-direction efficiency; round-trip = this value squared.
+      # Storage units carry the DB's literal resource_type, including the
+      # "(Pumping)" suffix -- keys here must match that exactly or the lookup
+      # silently misses and falls back to 1.0.
+      'Hydro - Pump Storage Open Loop (Pumping)': 0.9
+      'Hydro - Pump Storage Closed Loop (Pumping)': 0.9
+      'Biofuel': 0.40  # Matched fuel is "Biomethane" (gaseous), so assume gas-engine/turbine-type combustion rather than a solid-biomass steam cycle
+      'Small biomass': 0.30  # Not matched to any fuel price (unlike Biofuel) and currently unused
+      'Others (non-RES)': 0.35
+    # Carriers whose committable generators are free to (re)commit in the intra-day
+    # stage. align_ramp_limits does not lock their ramp limits / availability to the
+    # day-ahead commitment status.
+    id_free_commitment_carriers:
+    - Gas
+    - Oil
+    - DSR_explicit
+    - Gas CCGT CCS
+    - Gas CCGT new
+    - Gas CCGT old 1
+    - Gas CCGT old 2
+    - Gas CCGT present 1
+    - Gas CCGT present 2
+    - Gas conventional old 1
+    - Gas conventional old 2
+    - Gas OCGT new
+    - Gas OCGT old
+    - Heavy oil
+    - Heavy oil old 1
+    - Heavy oil old 2
+    - Light oil
+    - Natural gas
+    - Oil shale new
+    - Oil shale old
+    committable_carriers:
+    - Coal
+    - Hard coal
+    - Gas
+    - Nuclear
+    - Oil
+###### Everything below here is just for unit-level carriers, while above is for aggregated data.
+    - Gas CCGT CCS
+    - Gas CCGT new
+    - Gas CCGT old 1
+    - Gas CCGT old 2
+    - Gas CCGT present 1
+    - Gas CCGT present 2
+    - Gas conventional old 1
+    - Gas conventional old 2
+    - Gas OCGT new
+    - Gas OCGT old
+    - Hard coal new
+    - Hard coal old 1
+    - Hard coal old 2
+    - Heavy oil
+    - Heavy oil old 1
+    - Heavy oil old 2
+    - Light oil
+    - Lignite
+    - Lignite new
+    - Lignite old
+    - Lignite old 1
+    - Lignite old 2
+    - Natural gas
+    - Oil shale new
+    - Oil shale old
+    - Other non-RES / Gas CCGT CCS
+    - Other non-RES / Gas CCGT new
+    - Other non-RES / Gas CCGT old 1
+    - Other non-RES / Gas CCGT old 2
+    - Other non-RES / Gas CCGT present 2
+    - Other non-RES / Gas conventional old 1
+    - Other non-RES / Gas OCGT old
+    - Other non-RES / Hard Coal CCS
+    - Other non-RES / Hard coal new
+    - Other non-RES / Hard coal old 1
+    - Other non-RES / Hard coal old 2
+    - Other non-RES / Heavy oil old 2
+    - Other non-RES / Lignite new
+    - Other non-RES / Lignite old 1
+    - Other non-RES / Oil shale old
+    - Thermal
+    renewable_carriers:
+    - Solar (PV)
+    - Hydro - Run of River (Turbine)
+    - Wind Onshore
+    - Wind Offshore
+    - renewables
+    conventional_carriers:
+    - Coal
+    - Hard coal
+    - Gas
+    - Nuclear
+    - Oil
+###### Everything below here is just for unit-level carriers, while above is for aggregated data.
+    - Gas CCGT CCS
+    - Gas CCGT new
+    - Gas CCGT old 1
+    - Gas CCGT old 2
+    - Gas CCGT present 1
+    - Gas CCGT present 2
+    - Gas conventional old 1
+    - Gas conventional old 2
+    - Gas OCGT new
+    - Gas OCGT old
+    - Hard coal new
+    - Hard coal old 1
+    - Hard coal old 2
+    - Heavy oil
+    - Heavy oil old 1
+    - Heavy oil old 2
+    - Light oil
+    - Lignite
+    - Lignite new
+    - Lignite old
+    - Lignite old 1
+    - Lignite old 2
+    - Natural gas
+    - Oil shale new
+    - Oil shale old
+    - Other non-RES / Gas CCGT CCS
+    - Other non-RES / Gas CCGT new
+    - Other non-RES / Gas CCGT old 1
+    - Other non-RES / Gas CCGT old 2
+    - Other non-RES / Gas CCGT present 2
+    - Other non-RES / Gas conventional old 1
+    - Other non-RES / Gas OCGT old
+    - Other non-RES / Hard Coal CCS
+    - Other non-RES / Hard coal new
+    - Other non-RES / Hard coal old 1
+    - Other non-RES / Hard coal old 2
+    - Other non-RES / Heavy oil old 2
+    - Other non-RES / Lignite new
+    - Other non-RES / Lignite old 1
+    - Other non-RES / Oil shale old
+    - Thermal
+    decommissioned_carriers:
+      Generator: ['Coal', 'Hard coal', 'Lignite', 'Oil', 'Gas']
+      StorageUnit: [] # Placeholder to avoid errors when accessing eva.base_network.decommissioned_carriers.StorageUnit
+    negative_pricing:
+      enable: false
+      # Global defaults (used when per-carrier not specified)
+      share: 0.30
+      value: -50.0
+      # Per-carrier configuration for _NEG generators
+      carriers:
+        Solar (PV):
+          share: 0.40
+          value: -30.0
+        Wind Onshore:
+          share: 0.20
+          value: -50.0
+        Wind Offshore:
+          share: 0.30
+          value: -50.0
+        Hydro - Run of River (Turbine):
+          share: 0.20
+          value: -20.0
+  reserves:
+    option: "co-optimised"   # Options: "none", "co-optimised", "derated"
+    direction: ["up", "down"]   # Options: ["up"], ["down"], ["up", "down"]
+    fcr:
+      id_blocked: 1
+      penalty_cost: .1
+      reserve_blocking_method: "fraction"  # Only "fraction" supported for FCR
+    frr:
+      id_blocked: 0
+      penalty_cost: .1
+      reserve_blocking_method: "imbalance"  # Options: "fraction" (static) or "imbalance" (dynamic based on forecast errors)
+  sensitivity: false
+  export_lp_models: false
+  export_gurobi_logs: false
+  export_gurobi_mps: false
+  max_it: 3
+  maintenance_plan_frequency: 5
+  validation_plot_frequency: 0  # 0 disables the per-iteration validation plots
+  soc_validation_zones: ['BE00']  # Bidding zones to validate. All storage technologies in these zones will be plotted
+  capacity_update:
+    increment: 800
+    threshold: 70000
+    linear_decay: true
+    linear_decay_iterations: 20
+    linear_decay_min_step: 10
+  npv:
+    weighted_calculation:
+      enabled: false
+      cy_weights:  # Must sum to 1.0 (for the CYs being simulated) when enabled is true
+        2013: 0.5
+        2010: 0.5
+  enable_mothballing: true
+  enable_lifetime_extension: true
+  market_interconnection: "physical" #Options are fbmc, ntc, physical
+  advanced_clustering:
+    enable: false          # set to true to activate frequent horizon re-clustering
+    n_clusters: 12         # k for K-medoids
+    full_run_frequency: 10 # run all weeks every N EVA iterations
+    random_seed: 42        # for reproducibility
+    horizon_days: 7        # chunk length in days (e.g. 7 = one week, 14 = two weeks)
+  infeasibility_threshold: 0.0
+  fail_on_infeasibility: true  # Fail workflow if infeasibility threshold exceeded
+  patching_tol_status: 1.0e-4  # Tolerance for zeroing/rounding LP status residuals in fix_small_status_variables
+  patching_tol_ramp: 1.0e-4    # Max p.u. adjustment allowed in ramp feasibility corrections
+  integration_tests:
+    enable: false
+    soc_tolerance: 0.1  # Relative tolerance for SOC checks (10%)
+    dispatch_tolerance: 0.1  # Relative tolerance for dispatch checks (10%)
+    price_flow_tolerance: 0.05  # Relative tolerance for price-flow consistency (5%)
+    fail_on_error: false  # whether to fail the workflow if tests fail
+  eraa_year: 2024
+  dsr:
+    enabled: true
+    explicit_dsr:
+      enabled: true
+      da_dispatch_fixed_fraction: 0.0
+    implicit_dsr:
+      enabled: true
+      da_dispatch_fixed_fraction: 0.0
+  must_run:
+    enable_slack: true
+    slack_penalty: 1000.0
+  price_cap:
+    enable: true
+    day_ahead_values: [5000, 5000, 5000, 5000]   # One per ty
+    intraday_values: [10000, 10000, 10000, 10000]   # One per ty
+    increment: 500
+    maximum: 20000
+    multi_year_method: "expected" # Options: "interpolation", "last-year", "none", "expected"
+  dummy_storage_optimization:
+    enable: true
+    curtailment_targets: [0.05]
+    curtailment_targets_per_bz: false  # Read the target values per bidding zone from data/ds_curtailment_targets_by_bz.csv, keyed ct1..ctN, instead of using the values above directly
+    energy_power_ratios: [1, 2, 4, 6, 12, 24, 48, 168]
+    shared_across_countries: true
+    minimize_system_costs: true
+    export_models: false
+    network_needs: false # network needs are random mock data
+    enable_load_spillage: true
+    load_spillage_penalty: 10000.0
+    conventional_floor_carriers:      # technical minimum carriers, null: all conventional, []: must-run only
+    solver_options:
+      highs: highs-lp-baseline
+      gurobi: gurobi-optimal-dummy-storage
+  storage_planning:
+    enable: true
+    static_soc_target: 0.5
+    storage_plan_frequency: 5
+    storage_constraints_enabled: true
+    po_resolution: 8h
+    preopt_targeted_carriers: ["Hydro - Reservoir", "Hydro - Pump Storage Closed Loop (Pumping)", "Hydro - Pump Storage Open Loop (Pumping)"]
+    use_cyclic_soc: true # This also gates the state of charge intialization in the market models to the preopt levels
+  ramping_shortfall:
+    enable: true  # Enable/disable ramping shortfall indicator calculation
+  ramping_contribution:
+    n_worst_events: [1, 10, 25]  # Top N events to evaluate for ramping contributions
+  forced_outages:
+    enable: true
+    samples: 1
+    seed: [18]
+    n_units_per_fleet: 100
+  shadow_prices:
+    enable: false  # Enable extraction of shadow prices (dual variables) from optimization
+    constraints:
+      # Format: "ComponentType-constraint_name" matching PyPSA's internal naming
+      # The code looks for "mu_{constraint_name}" in the component's _t attribute
+      # One example per component type (adapt as needed):
+    - "Bus-nodal_balance"                     # Nodal electricity prices (EUR/MWh)
+    - "Generator-ramp_limit_up"               # Generator ramp-up limit dual (EUR/MW)
+    - "StorageUnit-state_of_charge_set"       # Storage SOC constraint dual (EUR/MWh)
+    - "Link-lower"                            # Link lower capacity dual
+      # Additional constraints that can be added:
+      # Bus: Reserve_requirements_FCR_up/down, Reserve_requirements_FRR_up/down
+      # Generator: ramp_limit_down, upper, lower
+      # StorageUnit: upper, lower
+      # Link: upper
+  short_term_requirements:
+    method: "simulation"  # Options: "simulation" or "probabilistic"
+    # System conditions for probabilistic method: season x time-of-day (4 conditions)
+    # Add condition_3_months, condition_c_hours etc. for more granularity
+    condition_1_months: [11, 12, 1, 2, 3]   # Winter months
+    condition_2_months: [4, 5, 6, 7, 8, 9, 10]  # Summer months
+    condition_a_hours: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]  # Day hours
+    condition_b_hours: [22, 23, 0, 1, 2, 3, 4, 5, 6]  # Night hours
+    percentile_low: 0.1    # Lower tail percentile for upward flex need
+    percentile_high: 99.9  # Upper tail percentile for downward flex need
+
+
+costs:
+  discount_rate: 0.05  # NPV fallback rate when hurdle rates unavailable
+  use_hurdle_rates: true  # Use technology-specific hurdle rates for NPV
+  exogenous_revenues:
+    enable: false  # Enable exogenous revenue streams (e.g., heat, balancing, capacity market)
+    file: "data/in_exogenous_revenues.xlsx"  # TODO(#188): remove Excel fallback — revenues should be sourced exclusively from the database (in_exogenous_revenues table); see build_network_from_database.py::add_exogenous_revenues_from_db
+  necp_targets:
+    enable: false  # Enable NECP target comparison for RES generation (Wind, Solar, Hydro)
+    file: "data/in_necp_targets.csv"  # CSV fallback — targets should be sourced from the database (in_necp_targets table)
+  co2_targets:
+    enable: false  # Enable CO2 target comparison for electricity-sector emissions per EU member state
+    file: "data/in_necp_targets.csv"  # CSV fallback — targets should be sourced from the database (in_necp_targets table)
+
+solving:
+  options:
+    load_shedding: true
+    reserve_shedding: false
+    load_spill: true
+    horizon: 72
+    overlap: 24
+    # options that go into the optimize function
+    linearized_unit_commitment: true
+    use_convex_hull_tightening: false  # Enable Hua et al. convex hull tightening for linearized UC
+  # Maintenance planning optimization parameters
+  maintenance_planning:
+    enable: true  # Enable maintenance planning optimization (set to false to assume all generators fully available)
+    min_duration_hours: 24  # Minimum duration for each maintenance window (hours)
+    annual_windows: 1  # Number of maintenance windows allowed per year per unit
+    penalty_weight: 1000.0 # Penalty weight on the normalized outage term (recommended range 1-1000)
+    # Simulated annealing parameters
+    sa_initial_acceptance: 0.8  # Probability of accepting the median worsening move at the start; the start temperature is calibrated per bus from sampled moves
+    sa_alpha: 0.997  # Slower cooling for better exploration
+    sa_max_iterations: 5000  # Reduced for performance with unit-level optimization
+    sa_units_per_move: 3  # Number of units to modify per iteration (higher = more exploration)
+    sa_parallel_runs: 1  # Number of parallel SA chains (uses multiple CPU cores)
+    sa_random_seed: 4  # Random seed for reproducibility
+    source: optimize  # Source for maintenance plan: "optimize" (SA-based) or "plan-id" (pre-computed via generate-maintenance-plans)
+    csv_path: ""  # Path to CSV file when source is "plan-id" (set automatically by --maint-plan-from-plan-id). May contain a "{ty}" placeholder, substituted per target year since each ty has its own generated plan file.
+
+  solver:
+    name: highs
+    options: highs-default
+
+  solver_options: # Named option profiles; select one with solving.solver.options
+    highs-default:
+      # refer to https://ergo-code.github.io/HiGHS/dev/options/definitions/
+      threads: 1
+      solver: "ipm"
+      run_crossover: "off"
+      small_matrix_value: 1e-9
+      large_matrix_value: 1e9
+      primal_feasibility_tolerance: 1e-5
+      dual_feasibility_tolerance: 1e-5
+      ipm_optimality_tolerance: 1e-4
+      parallel: "on"
+      random_seed: 123
+      log_to_console: true
+      output_flag: true
+    highs-hipo-lp-baseline:
+      solver: "hipo"
+      run_crossover: "off"
+      threads: 1
+      parallel: "off"          # default
+      random_seed: 123        # non-default, reproducibility
+      log_to_console: true   # non-default, avoids overhead
+      output_flag: true      # non-default, avoids overhead
+      user_objective_scale: -6
+      user_bound_scale: -8
+    highs-lp-baseline:
+      solver: "simplex"
+      run_crossover: "off"
+      threads: 1
+      parallel: "off"          # default
+      random_seed: 123        # non-default, reproducibility
+      log_to_console: true   # non-default, avoids overhead
+      output_flag: true      # non-default, avoids overhead
+    gurobi-default: # same as previous gurobi-lp-baseline
+      threads: 1
+      FeasibilityTol: 1.e-6 # default
+      OptimalityTol: 1.e-6  # default
+      BarConvTol: 1.e-8     # default
+      SolutionTarget: 1
+      Seed: 123             # non-default, reproducibility
+    gurobi-milp-baseline:
+      threads: 1 # default value; overridden through --solver-threads
+      MIPGap: 1.e-4 # default
+      Seed: 123     # non-default, reproducibility
+    gurobi-optimal:
+      threads: 1 # default value; overridden through --solver-threads
+      Method: 0
+      NumericFocus: 1
+      PrePasses: 2
+      PreSparsify: 0
+      SolutionTarget: 1
+    gurobi-optimal-dummy-storage:
+      threads: 1 # default value; overridden through --solver-threads
+      AggFill: 0
+      Method: 2
+      PreDual: 0
+      ScaleFlag: 0
+
+plotting:
+  enable: false  # Enable/disable plot_model_outputs rule
+  nice_names:
+    OCGT: "Open-Cycle Gas"
+    CCGT: "Combined-Cycle Gas"
+    offwind-ac: "Offshore Wind (AC)"
+    offwind-dc: "Offshore Wind (DC)"
+    offwind-float: "Offshore Wind (Floating)"
+    onwind: "Onshore Wind"
+    solar: "Solar"
+    PHS: "Pumped Hydro Storage"
+    hydro: "Reservoir & Dam"
+    battery: "Battery Storage"
+    H2: "Hydrogen Storage"
+    lines: "Transmission Lines"
+    ror: "Run of River"
+    load: "Elec. Demand"
+    ac: "AC"
+    dc: "DC"
+    DSR_explicit: "DSR Explicit"
+    DSR_implicit: "DSR Implicit"
+
+  tech_colors:
+    # wind
+    load shedding: "#ff0000"
+    reserve shedding: "#ff00ff"
+    load spillage: "#df8e23"
+    'Gas': '#e05b09'
+    'Solar (PV)': '#f9d002'
+    'Wind Onshore': '#235ebc'
+    'DSR': '#ff0066'
+    'DSR_explicit': '#8b4789'
+    'DSR_implicit': '#ff6b35'
+    'dsr explicit': '#8b4789'
+    'dsr implicit': '#ff6b35'
+    'Electrolyser': '#ff29d9'
+    'Non-market batteries': '#80c944'
+    'Oil': '#c9c9c9'
+    'Others (non-RES)': '#666666'
+    'Small biomass': '#9d9042'
+    'Biofuel': '#32CD32'
+    'Wind Offshore': '#6895dd'
+    'Hard coal': '#545454'
+    'Not defined or splitting not known RES': '#cccccc'
+    'FuelCell': '#c251ae'
+    'Solar (Thermal)': '#ffbf2b'
+    'Geothermal': '#ba91b1'
+    'Marine': '#74c6f2'
+    'Hydro - Reservoir': '#298c81'
+    'Hydro - Run of River (Turbine)': '#3dbfb0'
+    'Batteries': '#ace37f'
+    'Hydro - Pondage': '#5bc7b8'
+    'Hydro - Pump Storage Closed Loop (Pumping)': '#51dbcc'
+    'Hydro - Pump Storage Open Loop (Pumping)': '#42c9bb'
+    Nuclear: '#ff8c00'
+    Coal: '#545454'
+    AC: "#70af1d"
+    DC: "#8a1caf"
+    load: "#dd2e23"
+    electricity: "#ff0000"
+    renewables: "#9d9042"

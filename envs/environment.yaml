@@ -1,0 +1,37 @@
+# Contributors to EU-Wide Flexibility Needs Assessment Model of the Future European Energy System
+#
+# Environment for the public eu-flex-model repository, which
+# tools/make_public_repo.py ships as its envs/. It holds only what the model
+# workflow under src/euflex/workflow/eu_flex_model needs: no database, CLI,
+# deployment or development dependencies. Pins follow envs/environment.yaml.
+# Lock it with envs/update_conda_lock.py, like the platform environment.
+
+name: eu-flex
+channels:
+- conda-forge
+- bioconda
+dependencies:
+- python>=3.11, <3.13
+- pip
+- openssl>=3.6.4  # security floor: fixes CVE-2026-63073, CVE-2026-75803 (Critical)
+
+- pypsa=0.33.2
+- linopy=0.7.0
+
+# Dependencies of the workflow itself
+- scikit-learn>=1.0 # used by cluster_weeks.py (T3.8.1 advanced clustering)
+- openpyxl # needed as long as we load FBMC data from excel files
+- seaborn-base
+- snakemake-minimal>=9, <=9.16.3
+- packaging<26  # snakemake-interface-common 1.23.0 (pulled via snakemake) caps packaging<26; conda ignores this pip-level bound
+- pandas>=2.1, <2.3
+- numpy<2.5  # Pin to <2.5 - NumPy 2.5.0 has breaking changes incompatible with xarray 2026.2.0 (deprecated .shape setter, timedelta overflow)
+- xarray<2026.4.0
+- matplotlib-base>=3.10,<3.11  # Pin to 3.10.x - 3.11.0 has NaN handling bug in tick calculations
+- pandera>=0.20,<0.31  # Pin to 0.30.x - 0.31+ creates nullable BooleanDtype incompatible with NetCDF export
+- pyyaml
+- filelock
+- cartopy
+
+- pip:
+  - highspy

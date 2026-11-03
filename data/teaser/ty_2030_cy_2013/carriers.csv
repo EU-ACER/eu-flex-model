@@ -1,0 +1,27 @@
+name,co2_emissions,color,nice_name
+AC,0,#70af1d,AC
+DC,0,#8a1caf,DC
+Hydro - Pump Storage Open Loop (Pumping),0,#42c9bb,Hydro - Pump Storage Open Loop (Pumping)
+Batteries,0,#ace37f,Batteries
+Hydro - Pump Storage Closed Loop (Pumping),0,#51dbcc,Hydro - Pump Storage Closed Loop (Pumping)
+Hydro - Pondage,0,#5bc7b8,Hydro - Pondage
+Hydro - Reservoir,0,#298c81,Hydro - Reservoir
+DSR_implicit,0,#ff6b35,DSR Implicit
+Coal,2.685714285714286,#545454,Coal
+Small biomass,0,#9d9042,Small biomass
+Nuclear,0,#ff8c00,Nuclear
+Wind Offshore,0,#6895dd,Wind Offshore
+Electrolyser,0,#ff29d9,Electrolyser
+Gas,0.95,#e05b09,Gas
+Oil,2.2285714285714286,#c9c9c9,Oil
+Solar (PV),0,#f9d002,Solar (PV)
+Wind Onshore,0,#235ebc,Wind Onshore
+Hydro - Run of River (Turbine),0,#3dbfb0,Hydro - Run of River (Turbine)
+Others (non-RES),0,#666666,Others (non-RES)
+DSR_explicit,0,#8b4789,DSR Explicit
+Not defined or splitting not known RES,0,#cccccc,Not defined or splitting not known RES
+Biofuel,0,#32CD32,Biofuel
+electricity,0,#FFD700,Electricity
+load shedding,0,#dd2e23,Load shedding
+load spillage,0,#df8e23,Load spillage
+load,0,#dd2e23,Elec. Demand

@@ -1,0 +1,88 @@
+name: Issue Acknowledgment
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  acknowledge:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Acknowledge issue submission
+      uses: actions/github-script@v7
+      with:
+        script: |-
+          const issueLabels = context.payload.issue.labels.map(label => label.name);
+          const issueNumber = context.payload.issue.number;
+          const issueTitle = context.payload.issue.title;
+
+          // Determine the type of issue
+          let responseMessage = '';
+
+          if (issueLabels.includes('bug')) {
+            responseMessage = `Thank you for reporting this issue!
+
+          Your bug report has been received and logged for the ACER preliminary public consultation period (November 5 - December 17, 2026).
+
+          **Important notes:**
+          - All feedback will be collected and summarized in the July 2027 report.
+          - During this preliminary release phase, we will primarily address bugs and errors that prevent users from running the model and providing feedback.
+          - Other issues and enhancement requests will be reviewed and considered for future releases.
+
+          If this is a **critical bug** that prevents you from using the model, please ensure it is marked as **High priority** so we can address it promptly.
+
+          For security-related issues, please report them directly to security@acer.europa.eu instead of this public tracker.`;
+          } else if (issueLabels.includes('enhancement') || issueLabels.includes('feature')) {
+            responseMessage = `Thank you for your feature request!
+
+          Your suggestion has been received and logged for the ACER preliminary public consultation period (November 5 - December 17, 2026).
+
+          **Important notes:**
+          - All feedback will be collected and summarized in the July 2027 report.
+          - Feature requests and enhancements will be reviewed and prioritized for future releases.
+          - During this preliminary phase, we are primarily focused on addressing critical bugs that prevent model usage.
+
+          We appreciate your input in helping improve the EU-Flex model!`;
+          } else if (issueLabels.includes('documentation')) {
+            responseMessage = `Thank you for your documentation feedback!
+
+          Your feedback on the User Manual and documentation has been received and logged for the ACER preliminary public consultation period (November 5 - December 17, 2026).
+
+          **Important notes:**
+          - Documentation feedback is extremely valuable for improving the user experience.
+          - All feedback will be collected and reviewed to enhance the User Manual and README for future releases.
+          - Your input will be summarized in the July 2027 report.
+
+          We appreciate your help in making the EU-Flex model documentation clearer and more comprehensive!`;
+          } else if (issueLabels.includes('question')) {
+            responseMessage = `Thank you for your question!
+
+          Your question has been received and logged for the ACER preliminary public consultation period (November 5 - December 17, 2026).
+
+          **Important notes:**
+          - All feedback, including questions about documentation and user instructions, will be collected and reviewed.
+          - Questions highlighting unclear documentation will help us improve the user manual for future releases.
+          - If this question relates to a bug preventing you from using the model, please consider filing a bug report instead.
+
+          We will review all questions as part of our consultation feedback process.`;
+          } else {
+            responseMessage = `Thank you for your submission!
+
+          Your issue has been received and logged for the ACER preliminary public consultation period (November 5 - December 17, 2026).
+
+          **Important notes:**
+          - All feedback will be collected and summarized in the July 2027 report.
+          - During this preliminary release phase, we will primarily address bugs and errors that prevent users from running the model and providing feedback.
+
+          We appreciate your contribution to improving the EU-Flex model!`;
+          }
+
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issueNumber,
+            body: responseMessage
+          });

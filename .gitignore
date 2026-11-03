@@ -1,0 +1,14 @@
+resources/
+results/
+logs/
+benchmarks/
+var/
+config/config.yaml
+.snakemake/
+__pycache__/
+*.egg-info/
+runs/
+.ipynb_checkpoints/
+.DS_Store
+*/.DS_Store
+.idea/

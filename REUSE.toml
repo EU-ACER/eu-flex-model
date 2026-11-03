@@ -1,0 +1,64 @@
+# Contributors to EU-Wide Flexibility Needs Assessment Model of the Future European Energy System
+#
+# Copyright and licensing for files that do not carry a header of their own,
+# following the REUSE specification (https://reuse.software/spec-3.3/). Where
+# several annotations match a file, the last one wins. Check with `reuse lint`.
+
+version = 1
+
+# Code, notebooks and model configuration.
+[[annotations]]
+path = ["**/*.py", "**/*.smk", "**/Snakefile", "**/*.yaml", "**/*.ipynb", "pyproject.toml"]
+SPDX-FileCopyrightText = "Contributors to EU-Wide Flexibility Needs Assessment Model of the Future European Energy System"
+SPDX-License-Identifier = "MIT"
+
+# Documentation.
+[[annotations]]
+path = ["**/*.md", "doc/**"]
+SPDX-FileCopyrightText = "Contributors to EU-Wide Flexibility Needs Assessment Model of the Future European Energy System"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Repository settings, environments and model input data.
+[[annotations]]
+path = [
+    ".github/**",
+    ".gitignore",
+    "CITATION.cff",
+    "config/.gitkeep",
+    "data/ds_curtailment_targets_by_bz.csv",
+    "envs/**",
+]
+SPDX-FileCopyrightText = "Contributors to EU-Wide Flexibility Needs Assessment Model of the Future European Energy System"
+SPDX-License-Identifier = "CC0-1.0"
+
+# The test model of the ACER paper "Preparing for the European flexibility
+# needs assessment" (2026).
+[[annotations]]
+path = "data/teaser/**"
+SPDX-FileCopyrightText = "Contributors to EU-Wide Flexibility Needs Assessment Model of the Future European Energy System"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# The synthetic demonstration case, built only for testing: networks of
+# invented numbers, generated when the tree was built.
+[[annotations]]
+path = "data/pre-builts/**"
+SPDX-FileCopyrightText = "Contributors to EU-Wide Flexibility Needs Assessment Model of the Future European Energy System"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Taken over from PyPSA-Eur, where it was CC0-1.0 too.
+[[annotations]]
+path = "matplotlibrc"
+SPDX-FileCopyrightText = [
+    "Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>",
+    "Contributors to EU-Wide Flexibility Needs Assessment Model of the Future European Energy System",
+]
+SPDX-License-Identifier = "CC0-1.0"
+
+# The model defaults grew out of PyPSA-Eur's config.default.yaml (CC0-1.0).
+[[annotations]]
+path = "src/euflex/eu_flex_model/config/config.default.yaml"
+SPDX-FileCopyrightText = [
+    "Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>",
+    "Contributors to EU-Wide Flexibility Needs Assessment Model of the Future European Energy System",
+]
+SPDX-License-Identifier = "MIT"

@@ -1,0 +1,4 @@
+name,bus0,bus1,carrier,p_nom,Number of poles [#],Forced Outage Rate [%],FOR direction,p_min_pu,p_max_pu
+N1-N2,N1,N2,AC,4000,1,0,Bi-directional,-1,1
+N2-N3,N2,N3,AC,4000,1,0,Bi-directional,-1,1
+N3-N1,N3,N1,AC,4000,1,0,Bi-directional,-1,1

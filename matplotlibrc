@@ -1,0 +1,7 @@
+# Contributors to EU-Wide Flexibility Needs Assessment Model of the Future European Energy System
+font.family: sans-serif
+image.cmap: viridis
+figure.autolayout : True
+figure.dpi : 400
+legend.frameon : False
+backend : tkagg
